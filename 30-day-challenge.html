@@ -66,6 +66,11 @@ const X = ({ className = '' }) => (
 // --- DATA STRUCTURE (All 30 Days) ---
 const challengeData = [
   {
+    day: 0,
+    title: "Forside",
+    exercises: []
+  },
+  {
     day: 1,
     title: "Dag 1: Klaverets Tangenter",
     exercises: [
@@ -682,8 +687,10 @@ const Exercise = ({ data, number, isLightInk }) => {
 function App() {
   const searchParams = new URLSearchParams(window.location.search);
   const isLightInk = searchParams.get('ink') === 'light';
-  const [currentDay, setCurrentDay] = useState(1);
+  const [currentDay, setCurrentDay] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [completedDays, setCompletedDays] = useState({});
+  const [confettiBursts, setConfettiBursts] = useState([]);
 
   const activeData = challengeData.find(d => d.day === currentDay) || challengeData[0];
   
@@ -695,6 +702,31 @@ function App() {
     window.print();
   };
 
+  const triggerConfetti = () => {
+    const id = Date.now();
+    const palette = ['#22c55e', '#0ea5e9', '#f59e0b', '#ef4444', '#a855f7', '#14b8a6'];
+    const pieces = Array.from({ length: 120 }, (_, index) => ({
+      id: `${id}-${index}`,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      duration: 2.3 + Math.random() * 1.3,
+      size: 5 + Math.random() * 7,
+      rotate: Math.random() * 360,
+      color: palette[Math.floor(Math.random() * palette.length)],
+    }));
+
+    setConfettiBursts(prev => [...prev, { id, pieces }]);
+    setTimeout(() => {
+      setConfettiBursts(prev => prev.filter(burst => burst.id !== id));
+    }, 4200);
+  };
+
+  const markDayCompleted = (day) => {
+    if (!day || day === 0) return;
+    setCompletedDays(prev => ({ ...prev, [day]: true }));
+    triggerConfetti();
+  };
+
   return (
     <div className={`min-h-screen bg-slate-100 flex font-sans text-slate-900 ${isLightInk ? 'ink-light' : ''}`}>
       
@@ -703,6 +735,26 @@ function App() {
         @page {
           size: A4;
           margin: 15mm 20mm;
+        }
+        @keyframes confetti-fall {
+          0% {
+            transform: translate3d(0, -15vh, 0) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(0, 120vh, 0) rotate(720deg);
+            opacity: 0;
+          }
+        }
+        .confetti-piece {
+          position: fixed;
+          top: -10px;
+          border-radius: 2px;
+          pointer-events: none;
+          z-index: 70;
+          animation-name: confetti-fall;
+          animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+          animation-fill-mode: forwards;
         }
         @media print {
           body {
@@ -765,6 +817,26 @@ function App() {
         }
       `}</style>
 
+      <div className="print-hide pointer-events-none fixed inset-0 z-50 overflow-hidden">
+        {confettiBursts.map(burst =>
+          burst.pieces.map(piece => (
+            <span
+              key={piece.id}
+              className="confetti-piece"
+              style={{
+                left: `${piece.left}%`,
+                width: `${piece.size}px`,
+                height: `${Math.max(4, piece.size * 0.6)}px`,
+                backgroundColor: piece.color,
+                transform: `rotate(${piece.rotate}deg)`,
+                animationDelay: `${piece.delay}s`,
+                animationDuration: `${piece.duration}s`,
+              }}
+            />
+          ))
+        )}
+      </div>
+
       {/* Sidebar Navigation */}
       <aside className={`print-hide bg-white w-72 border-r border-slate-200 flex flex-col transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full absolute h-full z-10'}`}>
         <div className="p-6 border-b border-slate-200 flex justify-between items-center">
@@ -791,8 +863,11 @@ function App() {
                   : 'hover:bg-slate-50 text-slate-600'
               }`}
             >
-              <span className="truncate pr-2">Dag {day.day}</span>
-              {currentDay === day.day && <ChevronRight className="w-4 h-4 text-blue-600" />}
+              <span className="truncate pr-2">{day.day === 0 ? 'Forside' : `Dag ${day.day}`}</span>
+              <div className="flex items-center gap-2">
+                {day.day !== 0 && completedDays[day.day] && <span className="text-emerald-600 text-sm">✓</span>}
+                {currentDay === day.day && <ChevronRight className="w-4 h-4 text-blue-600" />}
+              </div>
             </button>
           ))}
         </div>
@@ -826,8 +901,47 @@ function App() {
         {/* A4 Canvas Area */}
         <div className="main-scroll-area flex-1 overflow-y-auto p-8 bg-slate-100 flex flex-col items-center gap-8 print:p-0">
           
-          {/* A4 PAGE 1 */}
-          <div className="a4-page bg-white w-[210mm] min-h-[297mm] shadow-lg rounded-sm relative flex flex-col mx-auto shrink-0 print:rounded-none">
+          {currentDay === 0 ? (
+            <div className="a4-page bg-white w-[210mm] min-h-[297mm] shadow-lg rounded-sm relative flex flex-col items-center justify-center p-[20mm] mx-auto shrink-0 print:rounded-none">
+              <div className="absolute top-0 left-0 w-full h-full p-4 print:p-8 box-border pointer-events-none">
+                <div className="w-full h-full border-[8px] border-double border-slate-300 print:border-slate-800"></div>
+              </div>
+              <div className="relative z-10 flex flex-col items-center text-center w-full">
+                <div className="mb-12 print:mb-16">
+                  <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-800 mx-auto">
+                    <path d="M9 18V5l12-2v13" />
+                    <circle cx="6" cy="18" r="3" />
+                    <circle cx="18" cy="16" r="3" />
+                  </svg>
+                </div>
+                
+                <h1 className="text-6xl font-bold text-slate-900 font-serif tracking-tight mb-6">Elenas Rejse</h1>
+                <h2 className="text-2xl text-slate-500 uppercase tracking-[0.2em] mb-20 font-medium">30-Dages Klaver Udfordring</h2>
+                
+                <div className="w-full max-w-md flex flex-col gap-10 mt-12 text-left px-8">
+                  <div className="flex items-end gap-4 text-xl text-slate-800">
+                    <span className="font-semibold w-28">Navn:</span>
+                    <div className="flex-1 border-b-2 border-slate-400 pb-1 font-serif text-3xl text-center">Elena</div>
+                  </div>
+                  <div className="flex items-end gap-4 text-xl text-slate-800">
+                    <span className="font-semibold w-28">Start dato:</span>
+                    <div className="flex-1 border-b-2 border-slate-400"></div>
+                  </div>
+                  <div className="flex items-end gap-4 text-xl text-slate-800">
+                    <span className="font-semibold w-28">Slut dato:</span>
+                    <div className="flex-1 border-b-2 border-slate-400"></div>
+                  </div>
+                </div>
+
+                <div className="mt-32 text-slate-400 text-sm tracking-widest uppercase">
+                  En musikalsk begyndelse
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* A4 PAGE 1 */}
+              <div className="a4-page bg-white w-[210mm] min-h-[297mm] shadow-lg rounded-sm relative flex flex-col mx-auto shrink-0 print:rounded-none">
             {/* Page Header */}
             <div className="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-end p-[15mm] pb-4">
               <div>
@@ -878,14 +992,26 @@ function App() {
 
              {/* Completion Section */}
              <div className="mt-auto px-[15mm] py-8 border-t-2 border-slate-100 flex flex-col items-center justify-center bg-slate-50 print:bg-white print:border-t-2 print:border-black">
-                <CheckCircle className="w-8 h-8 text-slate-300 print:text-black mb-2" />
-                <p className="text-slate-600 font-medium print:text-black">Dag {activeData.day} Færdig!</p>
-                <div className="mt-4 flex items-center gap-2 text-sm text-slate-500 print:text-black">
-                  <span>Lærer/Forældre Underskrift:</span>
-                  <div className="border-b border-slate-400 w-48"></div>
-                </div>
-            </div>
-          </div>
+                 <CheckCircle className="w-8 h-8 text-slate-300 print:text-black mb-2" />
+                 <p className="text-slate-600 font-medium print:text-black">Dag {activeData.day} Færdig!</p>
+                 <button
+                   onClick={() => markDayCompleted(activeData.day)}
+                   className="print-hide mt-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-md transition-colors"
+                 >
+                   Markér dag som færdig
+                 </button>
+                 {completedDays[activeData.day] && (
+                   <p className="print-hide mt-2 text-emerald-700 text-sm font-medium">Flot arbejde! Dagen er gemt som færdig.</p>
+                 )}
+                 <div className="mt-4 flex items-center gap-2 text-sm text-slate-500 print:text-black">
+                   <span>Lærer/Forældre Underskrift:</span>
+                   <div className="border-b border-slate-400 w-48"></div>
+                 </div>
+             </div>
+           </div>
+
+          </>
+        )}
 
         </div>
       </main>
