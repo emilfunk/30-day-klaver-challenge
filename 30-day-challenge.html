@@ -550,7 +550,7 @@ const challengeData = [
 // --- COMPONENTS ---
 
 // 1. Piano Keyboard SVG Component
-const Keyboard = ({ id }) => {
+const Keyboard = ({ id, lightInk }) => {
   const [activeKeys, setActiveKeys] = useState({});
 
   const toggleKey = (keyIndex) => {
@@ -568,7 +568,7 @@ const Keyboard = ({ id }) => {
           <rect
             key={`w-${k}`}
             x={i * 20} y="0" width="20" height="80"
-            fill={activeKeys[k] ? '#93c5fd' : 'white'}
+            fill={lightInk ? 'white' : (activeKeys[k] ? '#93c5fd' : 'white')}
             stroke="#1e293b" strokeWidth="1"
             onClick={() => toggleKey(k)}
             className="cursor-pointer hover:fill-blue-50 transition-colors"
@@ -581,7 +581,7 @@ const Keyboard = ({ id }) => {
             <rect
               key={`b-${k}`}
               x={(i * 20) + 14} y="0" width="12" height="45"
-              fill={activeKeys[k] ? '#3b82f6' : '#1e293b'}
+              fill={lightInk ? 'white' : (activeKeys[k] ? '#3b82f6' : '#1e293b')}
               stroke="#0f172a" strokeWidth="1"
               onClick={() => toggleKey(k)}
               className="cursor-pointer hover:fill-slate-700 transition-colors"
@@ -632,7 +632,7 @@ const Staff = ({ clef, notePos, grandStaff }) => {
 };
 
 // 3. Exercise Renderer Component
-const Exercise = ({ data, number }) => {
+const Exercise = ({ data, number, isLightInk }) => {
   const inferredClef = data.clef || (data.text.includes('F-nøgle') ? 'bass' : data.text.includes('G-nøgle') ? 'treble' : undefined);
 
   return (
@@ -657,7 +657,7 @@ const Exercise = ({ data, number }) => {
         </div>
       )}
 
-      {data.type === 'keyboard' && <Keyboard id={data.id} />}
+      {data.type === 'keyboard' && <Keyboard id={data.id} lightInk={isLightInk} />}
 
       {data.type === 'drawing' && (
         <div className="mt-2 border-2 border-dashed border-slate-200 rounded-lg p-4 print:border-slate-400 bg-slate-50 print:bg-white min-h-[80px]">
@@ -680,6 +680,8 @@ const Exercise = ({ data, number }) => {
 
 // --- MAIN APP COMPONENT ---
 function App() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const isLightInk = searchParams.get('ink') === 'light';
   const [currentDay, setCurrentDay] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -694,7 +696,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex font-sans text-slate-900">
+    <div className={`min-h-screen bg-slate-100 flex font-sans text-slate-900 ${isLightInk ? 'ink-light' : ''}`}>
       
       {/* Global CSS for Print and Custom styling */}
       <style>{`
@@ -706,6 +708,30 @@ function App() {
           body {
             background-color: white !important;
             -webkit-print-color-adjust: exact;
+          }
+          .ink-light * {
+            box-shadow: none !important;
+            text-shadow: none !important;
+          }
+          .ink-light .bg-slate-50,
+          .ink-light .bg-slate-100,
+          .ink-light .bg-blue-50,
+          .ink-light .bg-white {
+            background: white !important;
+          }
+          .ink-light .text-blue-700,
+          .ink-light .text-blue-600,
+          .ink-light .text-slate-600,
+          .ink-light .text-slate-500,
+          .ink-light .text-slate-400 {
+            color: #111827 !important;
+          }
+          .ink-light .border-slate-800,
+          .ink-light .border-slate-400,
+          .ink-light .border-slate-300,
+          .ink-light .border-slate-200,
+          .ink-light .border-slate-100 {
+            border-color: #9ca3af !important;
           }
           main {
             height: auto !important;
@@ -823,7 +849,7 @@ function App() {
             {/* Exercises Container */}
             <div className="flex-1 px-[15mm] flex flex-col justify-between pb-8">
               {page1Exercises.map((ex, index) => (
-                <Exercise key={ex.id} data={ex} number={index + 1} />
+                <Exercise key={ex.id} data={ex} number={index + 1} isLightInk={isLightInk} />
               ))}
             </div>
             
@@ -846,7 +872,7 @@ function App() {
             {/* Exercises Container */}
             <div className="flex-1 px-[15mm] flex flex-col justify-between pb-8">
               {page2Exercises.map((ex, index) => (
-                <Exercise key={ex.id} data={ex} number={index + 6} />
+                <Exercise key={ex.id} data={ex} number={index + 6} isLightInk={isLightInk} />
               ))}
             </div>
 
