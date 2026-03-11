@@ -1,10 +1,10 @@
 This project will create a 30 day piano and music theory challenge The progression perfectly reflects a beginner-to-intermediate music theory journey. We will break the 30 days down into  **four logical phases** . Every day will feature exactly **10 bite-sized exercises** that we can format onto two A4 pages, gradually building her sight-reading and theory skills.
 
-Here is the structured 30-Day Blueprint for Ilina's Challenge:
+Here is the structured 30-Day Blueprint for Elena's Challenge:
 
 ### **Phase 1: The Absolute Basics (Days 1–7)**
 
-*Goal: Familiarize Ilina with the piano topography, rhythmic fundamentals, and the Grand Staff.*
+*Goal: Familiarize Elena with the piano topography, rhythmic fundamentals, and the Grand Staff.*
 
 * **Day 1: The Piano Keyboard.** Identifying white keys, finding Middle C, and the musical alphabet.
 * **Day 2: The Grand Staff & Clefs.** Drawing and understanding the Treble Clef, Bass Clef, and bar lines.
@@ -54,7 +54,7 @@ Here is the structured 30-Day Blueprint for Ilina's Challenge:
 
 ### **Anatomy of the Daily 10 Exercises**
 
-For each day, the 10 exercises will be highly varied so Ilina doesn't get bored. They will include:
+For each day, the 10 exercises will be highly varied so Elena doesn't get bored. They will include:
 
 1. **True/False** or **Multiple Choice** questions.
 2. **Note Naming** (writing the letter under the staff).
